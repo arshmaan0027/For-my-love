@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Love Game ❤️</title>
+
+<style>
+
+/* ===============================
+   GLOBAL STYLES
+================================= */
+
+:root{
+--bg1:#ffe6f0;
+--bg2:#fff5f9;
+--primary:#ff4d88;
+--soft:#fff0f6;
+--text:#5c3a4a;
+--bot:#8d99ae;
+}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+font-family:'Segoe UI', sans-serif;
+}
+
+body{
+height:100vh;
+background:linear-gradient(135deg,var(--bg1),var(--bg2));
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+color:var(--text);
+}
+
+/* ===============================
+   FLOATING HEART BACKGROUND
+================================= */
+
+.heart-bg{
+position:absolute;
+width:15px;
+height:15px;
+background:var(--primary);
+transform:rotate(45deg);
+animation:float 8s linear infinite;
+opacity:0.4;
+}
+
+.heart-bg::before,
+.heart-bg::after{
+content:"";
+position:absolute;
+width:15px;
+height:15px;
+background:var(--primary);
+border-radius:50%;
+}
+
+.heart-bg::before{top:-8px;left:0;}
+.heart-bg::after{left:-8px;top:0;}
+
+@keyframes float{
+0%{transform:translateY(100vh) rotate(45deg);}
+100%{transform:translateY(-10vh) rotate(45deg);}
+}
+
+/* ===============================
+   CONTAINER
+================================= */
+
+.container{
+background:white;
+padding:30px;
+border-radius:25px;
+box-shadow:0 15px 40px rgba(255,77,136,0.3);
+text-align:center;
+width:90%;
+max-width:420px;
+z-index:10;
+}
+
+/* ===============================
+   HEADINGS
+================================= */
+
+h1{
+color:var(--primary);
+margin-bottom:15px;
+animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+0%{transform:scale(1);}
+50%{transform:scale(1.05);}
+100%{transform:scale(1);}
+}
+
+/* ===============================
+   BUTTONS
+================================= */
+
+button{
+padding:12px 25px;
+margin:10px;
+border:none;
+border-radius:30px;
+font-size:16px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.yes{
+background:var(--primary);
+color:white;
+box-shadow:0 5px 20px rgba(255,77,136,0.4);
+}
+
+.yes:hover{
+transform:scale(1.1);
+}
+
+.no{
+background:var(--bot);
+color:white;
+position:fixed;
+}
+
+button:hover{
+transform:scale(1.1);
+}
+
+/* ===============================
+   GAME STYLES
+================================= */
+
+#game{display:none;}
+
+.board{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-top:20px;
+}
+
+.cell{
+height:90px;
+background:var(--soft);
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:40px;
+border-radius:20px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.cell:hover{
+background:#ffe0eb;
+}
+
+.status{
+margin-top:10px;
+font-weight:bold;
+font-size:18px;
+}
+
+.restart{
+margin-top:15px;
+background:#ff85a2;
+color:white;
+}
+
+/* ===============================
+   CONFETTI
+================================= */
+
+.confetti{
+position:fixed;
+width:10px;
+height:10px;
+animation:fall 3s linear forwards;
+}
+
+@keyframes fall{
+to{
+transform:translateY(100vh) rotate(720deg);
+opacity:0;
+}
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
+
+@media(max-width:400px){
+.cell{height:70px;font-size:30px;}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Floating Hearts -->
+<script>
+for(let i=0;i<20;i++){
+let heart=document.createElement("div");
+heart.className="heart-bg";
+heart.style.left=Math.random()*100+"vw";
+heart.style.animationDuration=(5+Math.random()*5)+"s";
+document.body.appendChild(heart);
+}
+</script>
+
+<div class="container" id="intro">
+<h1>I love you ❤️</h1>
+<p>Will you choose love?</p>
+<button class="yes" onclick="startGame()">I love you too</button>
+<button class="no" id="noBtn" onmouseover="teleport()">I don't love you</button>
+</div>
+
+<div class="container" id="game">
+<h1>Tic Tac Toe ❤️</h1>
+<div class="status" id="status">Your Turn (♥)</div>
+<div class="board" id="board"></div>
+<button class="restart" onclick="createBoard()">Play Again</button>
+</div>
+
+<script>
+
+/* ===============================
+   INTRO LOGIC
+================================= */
+
+const intro=document.getElementById("intro");
+const game=document.getElementById("game");
+const boardElement=document.getElementById("board");
+const statusText=document.getElementById("status");
+let noBtn=document.getElementById("noBtn");
+
+function startGame(){
+alert("Aww thank you 😍");
+intro.style.display="none";
+game.style.display="block";
+createBoard();
+}
+
+function teleport(){
+noBtn.remove();
+let newBtn=document.createElement("button");
+newBtn.innerText="I don't love you";
+newBtn.className="no";
+newBtn.onmouseover=teleport;
+document.body.appendChild(newBtn);
+
+let x=Math.random()*(window.innerWidth-150);
+let y=Math.random()*(window.innerHeight-60);
+newBtn.style.left=x+"px";
+newBtn.style.top=y+"px";
+
+noBtn=newBtn;
+}
+
+/* ===============================
+   GAME LOGIC
+================================= */
+
+let board=[];
+let gameActive=true;
+const PLAYER="♥";
+const BOT="X";
+
+function createBoard(){
+board=["","","","","","","","",""];
+boardElement.innerHTML="";
+gameActive=true;
+statusText.innerText="Your Turn (♥)";
+
+for(let i=0;i<9;i++){
+let cell=document.createElement("div");
+cell.className="cell";
+cell.dataset.index=i;
+cell.onclick=playerMove;
+boardElement.appendChild(cell);
+}
+}
+
+function playerMove(){
+let index=this.dataset.index;
+if(board[index]!==""||!gameActive) return;
+
+board[index]=PLAYER;
+this.innerText=PLAYER;
+
+if(checkWinner(PLAYER)){
+statusText.innerText="Our love won! 🥰";
+confetti(80);
+gameActive=false;
+return;
+}
+
+if(!board.includes("")){
+statusText.innerText="It's complicated 😅";
+gameActive=false;
+return;
+}
+
+statusText.innerText="Bot is thinking...";
+setTimeout(botMove,500);
+}
+
+function botMove(){
+let empty=board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+if(empty.length===0) return;
+
+let random=empty[Math.floor(Math.random()*empty.length)];
+board[random]=BOT;
+boardElement.children[random].innerText=BOT;
+
+if(checkWinner(BOT)){
+statusText.innerText="The love is lost 😢";
+gameActive=false;
+return;
+}
+
+statusText.innerText="Your Turn (♥)";
+}
+
+function checkWinner(player){
+let wins=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
+
+return wins.some(pattern=>{
+return pattern.every(index=>board[index]===player);
+});
+}
+
+/* ===============================
+   CONFETTI
+================================= */
+
+function confetti(amount){
+for(let i=0;i<amount;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*window.innerWidth+"px";
+c.style.backgroundColor=`hsl(${Math.random()*360},100%,70%)`;
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),3000);
+}
+}
+
+</script>
+
+</body>
+</html>
